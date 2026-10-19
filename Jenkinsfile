@@ -1,0 +1,41 @@
+
+pipeline {
+    agent any
+
+    stages {
+        stage('Build') {
+            steps {
+                echo 'Installing Python dependencies...'
+                sh 'python3 --version'
+                sh 'python3 -m pip install --user -r requirements.txt'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                echo 'Running unit tests...'
+                sh 'python3 -m unittest discover -s . -v'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                echo 'Deploying application...'
+                sh '''
+                    mkdir -p "${WORKSPACE}/python-app-deploy"
+                    cp app.py "${WORKSPACE}/python-app-deploy/"
+                    cp requirements.txt "${WORKSPACE}/python-app-deploy/"
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed. Check the console output.'
+        }
+    }
+}
