@@ -5,16 +5,19 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                echo 'Installing Python dependencies...'
-                sh 'python3 --version'
-                sh 'python3 -m pip install --user -r requirements.txt'
+                echo 'Creating virtual environment and installing dependencies...'
+                sh '''
+                    python3 -m venv venv
+                    ./venv/bin/python -m pip install --upgrade pip
+                    ./venv/bin/python -m pip install -r requirements.txt
+                '''
             }
         }
 
         stage('Test') {
             steps {
                 echo 'Running unit tests...'
-                sh 'python3 -m unittest discover -s . -v'
+                sh './venv/bin/python -m unittest discover -s . -v'
             }
         }
 
@@ -23,8 +26,7 @@ pipeline {
                 echo 'Deploying application...'
                 sh '''
                     mkdir -p "${WORKSPACE}/python-app-deploy"
-                    cp app.py "${WORKSPACE}/python-app-deploy/"
-                    cp requirements.txt "${WORKSPACE}/python-app-deploy/"
+                    cp app.py requirements.txt "${WORKSPACE}/python-app-deploy/"
                 '''
             }
         }
